@@ -218,5 +218,94 @@ map.on('draw:created', function(e) {
 
 	drawnItems.addLayer(layer);
 });
+
+
+// GeoJSON Point
+var points = L.geoJSON(null, {
+	// Style
+
+	// onEachFeature
+    onEachFeature: function (feature, layer) {
+	// variable popup content
+	var popup_content = "Nama: " + feature.properties.name + "<br>" + "Deskripsi: " + feature.properties.description + "<br>" + "Dibuat: " + feature.properties.created_at;
+
+	layer.on({
+		click: function (e) {
+			points.bindPopup(popup_content);
+		},
+	});
+},
+
+});
+
+$.getJSON("{{route('points.geojson')}}", function (data) {
+	points.addData(data); // Menambahkan data ke dalam GeoJSON Point
+	map.addLayer(points); // Menambahkan GeoJSON Point ke dalam peta
+});
+
+// GeoJSON Polyline
+var polylines = L.geoJSON(null, {
+	// Style
+
+	// onEachFeature
+    onEachFeature: function (feature, layer) {
+	// variable popup content
+	var popup_content = "Nama: " + feature.properties.name + "<br>" + "Deskripsi: " + feature.properties.description + "<br>" + "Dibuat: " + feature.properties.created_at
+		;
+
+	layer.on({
+		click: function (e) {
+			polylines.bindPopup(popup_content);
+		},
+	});
+},
+
+});
+
+$.getJSON("{{route('polylines.geojson')}}", function (data) {
+	polylines.addData(data); // Menambahkan data ke dalam GeoJSON Polyline
+	map.addLayer(polylines); // Menambahkan GeoJSON Polyline ke dalam peta
+});
+
+// GeoJSON Polygon
+var polygons = L.geoJSON(null, {
+	// Style
+
+	// onEachFeature
+    onEachFeature: function (feature, layer) {
+	// variable popup content
+	var popup_content = "Nama: " + feature.properties.name + "<br>" + "Deskripsi: " + feature.properties.description + "<br>" + "Dibuat: " + feature.properties.created_at
+		;
+
+	layer.on({
+		click: function (e) {
+			polygons.bindPopup(popup_content);
+		},
+	});
+},
+
+});
+
+$.getJSON("{{route('polygons.geojson')}}", function (data) {
+	polygons.addData(data); // Menambahkan data ke dalam GeoJSON Polygon
+	map.addLayer(polygons); // Menambahkan GeoJSON Polygon ke dalam peta
+});
+
+// Control Layer
+var baseMaps = {
+    "Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }),
+};
+
+var overlayMaps = {
+	"Points": points,
+	"Polylines": polylines,
+	"Polygons": polygons,
+};
+
+var controllayer = L.control.layers(baseMaps, overlayMaps);
+controllayer.addTo(map);
     </script>
 @endsection
