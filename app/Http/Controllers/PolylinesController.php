@@ -40,6 +40,7 @@ class PolylinesController extends Controller
                 'geometry_polyline' => 'required',
                 'name' => 'required|string|max:255',
                 'description' => 'required|string',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ],
             [
                 'geometry_polyline.required' => 'Geometry polyline harus diisi.',
@@ -48,14 +49,33 @@ class PolylinesController extends Controller
                 'name.max' => 'Field name tidak boleh lebih dari 255 karakter.',
                 'description.required' => 'Field deskripsi harus diisi.',
                 'descripion.string' => 'Field deskripsi harus berupa string.',
+                'image.image' => 'File harus berupa file gambar.',
+                'image.mimes' => 'File harus berupa file gambar dengan ekstensi jpeg, png, atau jpg.',
+                'image.max' => 'Ukuran file tidak boleh lebih dari 2MB.',
             ]
         );
+
+        // buat folder untuk menyimpan gambar jika belum ada
+        if (!is_dir('storage/images')) {
+            mkdir('./storage/images', 0777);
+        }
+
+        // simpan gambar jika ada
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name_image = time() . "_polyline." . strtolower($image->getClientOriginalExtension());
+            $image->move('storage/images', $name_image);
+        } else {
+            $name_image = null;
+        }
 
         $data = [
             'geom' => $request->geometry_polyline,
             'name' => $request->name,
             'description' => $request->description,
+            'image' => $name_image,
         ];
+
 // simpan data ke database
         if (!$this->polylines->create($data)){
             return redirect()->route('peta')->with('error', 'Gagal menyimpan data polyline.');
