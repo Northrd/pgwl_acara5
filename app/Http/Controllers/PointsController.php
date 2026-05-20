@@ -97,7 +97,12 @@ class PointsController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $data = [
+            'title' => 'Edit Point',
+            'id' => $id,
+        ];
+
+        return view('map-edit-point', $data);
     }
 
     /**
@@ -105,7 +110,58 @@ class PointsController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
+        //Validasi input
+        $request->validate(
+            [
+                'geometry' => 'required',
+                'name' => 'required|string|max:255',
+                'description' => 'required|string',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            ],
+            [
+                'geometry.required' => 'Geometry point harus diisi.',
+                'name.required' => 'Field name harus diisi.',
+                'name.string' => 'Field name harus berupa string.',
+                'name.max' => 'Field name tidak boleh lebih dari 255 karakter.',
+                'description.required' => 'Field deskripsi harus diisi.',
+                'descripion.string' => 'Field deskripsi harus berupa string.',
+                'image.image' => 'File harus berupa file gambar.',
+                'image.mimes' => 'File harus berupa file gambar dengan ekstensi jpeg, png, atau jpg.',
+                'image.max' => 'Ukuran file tidak boleh lebih dari 2MB.',
+            ]
+        );
+
+        // buat folder untuk menyimpan gambar jika belum ada
+        if (!is_dir('storage/images')) {
+            mkdir('./storage/images', 0777);
+        }
+
+        $image_old = $this->points->find($id)->image;
+
+        // simpan gambar jika ada
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name_image = time() . "_point." . strtolower($image->getClientOriginalExtension());
+            $image->move('storage/images', $name_image);
+        } else {
+            $name_image = $image_old;
+        }
+
+        $data = [
+            'geom' => $request->geometry,
+            'name' => $request->name,
+            'description' => $request->description,
+            'image' => $name_image,
+        ];
+
+        // simpan update data ke database
+        if (!$this->points->find($id)->update($data)) {
+            return redirect()->route('peta')->with('error', 'Gagal mengupdate data point.');
+        }
+
+        // kembali ke halaman peta
+        return redirect()->route('peta')->with('success', 'Data point berhasil diupdate.');
     }
 
     /**
