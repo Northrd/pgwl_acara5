@@ -6,11 +6,15 @@ use App\Http\Controllers\PolygonsController;
 use App\Http\Controllers\PolylinesController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// Route::get('/', function () {
+//     return view('welcome');
+// })->name('home');
 
-Route::get('/peta', [PageController::class, 'peta'])->name('peta');
+Route::get('/', [PageController::class, 'landingpage'])->name('home');
+
+Route::get('/peta', [PageController::class, 'peta'])
+    ->middleware(['auth', 'verified'])
+    ->name('peta');
 
 Route::get('/tabel', [PageController::class, 'table'])->name('tabel');
 
